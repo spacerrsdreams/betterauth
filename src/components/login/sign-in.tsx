@@ -42,7 +42,10 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
     },
     onSubmit: async ({ value }) => {
       setIsLoading(true);
-      signInWithEmailAndPassword(value.email, value.password)
+      signInWithEmailAndPassword({
+        ...value,
+        callbackURL: `${process.env.NEXT_PUBLIC_DOMAIN}`,
+      })
         .then((data) => {
           if (data.error) {
             setError(data.error?.code ?? "Unknown error");
