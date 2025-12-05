@@ -1,6 +1,6 @@
 "use client";
 
-import { signUpWithEmailAndPassword } from "@/actions/auth";
+import { signUpWithEmailAndPassword } from "@/actions/auth/auth.actions";
 import { useActionState } from "react";
 
 export default function AuthPage() {

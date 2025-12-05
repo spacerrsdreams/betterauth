@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ShipIllustration } from "@/components/illustrations/ship.illustration";
 import { useActionState, useRef, useEffect } from "react";
-import { signInWithEmailAndPassword } from "@/actions/auth";
+import { signInWithEmailAndPassword } from "@/actions/auth/auth.actions";
 
 interface SignInFormProps {
   onSignUp: () => void;
