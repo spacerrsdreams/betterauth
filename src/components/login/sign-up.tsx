@@ -176,7 +176,7 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Sign up with Google</span>
+                  <span className="">Sign up with Google</span>
                 </Button>
               </Field>
               <FieldDescription className="text-center">
