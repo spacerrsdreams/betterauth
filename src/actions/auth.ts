@@ -5,14 +5,17 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+const MIN_PASSWORD_LENGTH = 6;
+const MinPasswordLengthError = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
+
 const signUpWithEmailAndPasswordSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
     email: z.email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(MIN_PASSWORD_LENGTH, MinPasswordLengthError),
     confirmPassword: z
       .string()
-      .min(6, "Confirm password must be at least 6 characters"),
+      .min(MIN_PASSWORD_LENGTH, MinPasswordLengthError),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -55,28 +58,20 @@ export async function signUpWithEmailAndPassword(
     };
   }
 
-  try {
-    await auth.api.signUpEmail({
-      body: {
-        name,
-        email,
-        password,
-      },
-    });
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : "Failed to sign up",
-      email,
+  await auth.api.signUpEmail({
+    body: {
       name,
-    };
-  }
+      email,
+      password,
+    },
+  });
 
   redirect("/");
 }
 
 const signInWithEmailAndPasswordSchema = z.object({
   email: z.email(),
-  password: z.string().min(6),
+  password: z.string().min(1),
 });
 
 export async function signInWithEmailAndPassword(
@@ -97,30 +92,21 @@ export async function signInWithEmailAndPassword(
     };
   }
 
-  try {
-    const response = await auth.api.signInEmail({
-      body: {
-        email,
-        password,
-      },
-    });
+  const response = await auth.api.signInEmail({
+    body: {
+      email,
+      password,
+    },
+  });
 
-    console.log("-------");
-    console.log(response.user);
-
-    if (!response.user)
-      return {
-        error: "Invalid email or password",
-        email,
-      };
-
-    redirect("/");
-  } catch {
+  if (!response.user) {
     return {
       error: "Invalid email or password",
       email,
     };
   }
+
+  redirect("/");
 }
 
 export async function signOut() {
