@@ -1,7 +1,7 @@
 import { signOut } from "@/actions/auth";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const session = await auth.api.getSession({
@@ -9,11 +9,7 @@ export default async function Home() {
   });
 
   if (!session) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Link href="/auth">Log In</Link>
-      </div>
-    );
+    return redirect("/login");
   }
 
   return (

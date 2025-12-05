@@ -5,18 +5,29 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
-const signUpWithEmailAndPasswordSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+const signUpWithEmailAndPasswordSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z
+      .string()
+      .min(6, "Confirm password must be at least 6 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
 type FormState = {
   error?: string;
+  email?: string;
+  name?: string;
   fieldErrors?: {
     name?: string[];
     email?: string[];
     password?: string[];
+    confirmPassword?: string[];
   };
 } | null;
 
@@ -27,15 +38,19 @@ export async function signUpWithEmailAndPassword(
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
 
   const result = signUpWithEmailAndPasswordSchema.safeParse({
     name,
     email,
     password,
+    confirmPassword,
   });
 
   if (!result.success) {
     return {
+      email,
+      name,
       fieldErrors: z.flattenError(result.error).fieldErrors,
     };
   }
@@ -51,6 +66,8 @@ export async function signUpWithEmailAndPassword(
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Failed to sign up",
+      email,
+      name,
     };
   }
 
@@ -62,29 +79,48 @@ const signInWithEmailAndPasswordSchema = z.object({
   password: z.string().min(6),
 });
 
-export async function signInWithEmailAndPassword(formData: FormData) {
+export async function signInWithEmailAndPassword(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { success, error } = signInWithEmailAndPasswordSchema.safeParse({
+  const result = signInWithEmailAndPasswordSchema.safeParse({
     email,
     password,
   });
 
-  if (!success) {
+  if (!result.success) {
     return {
-      error,
+      fieldErrors: z.flattenError(result.error).fieldErrors,
     };
   }
 
-  await auth.api.signInEmail({
-    body: {
-      email,
-      password,
-    },
-  });
+  try {
+    const response = await auth.api.signInEmail({
+      body: {
+        email,
+        password,
+      },
+    });
 
-  redirect("/");
+    console.log("-------");
+    console.log(response.user);
+
+    if (!response.user)
+      return {
+        error: "Invalid email or password",
+        email,
+      };
+
+    redirect("/");
+  } catch {
+    return {
+      error: "Invalid email or password",
+      email,
+    };
+  }
 }
 
 export async function signOut() {

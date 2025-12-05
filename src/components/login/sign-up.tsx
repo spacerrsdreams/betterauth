@@ -1,0 +1,201 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { ShipIllustration } from "@/components/illustrations/ship.illustration";
+import { useActionState, useRef, useEffect } from "react";
+import { signUpWithEmailAndPassword } from "@/actions/auth";
+
+interface SignUpFormProps {
+  onSignIn: () => void;
+}
+
+export default function SignUpForm({ onSignIn }: SignUpFormProps) {
+  const [state, formAction, isPending] = useActionState(
+    signUpWithEmailAndPassword,
+    null
+  );
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordInputRef = useRef<HTMLInputElement>(null);
+  const usernameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (state?.error || state?.fieldErrors) {
+      if (nameInputRef.current && state?.name) {
+        nameInputRef.current.value = state.name;
+      }
+      if (emailInputRef.current && state?.email) {
+        emailInputRef.current.value = state.email;
+      }
+      if (passwordInputRef.current) {
+        passwordInputRef.current.value = "";
+      }
+      if (confirmPasswordInputRef.current) {
+        confirmPasswordInputRef.current.value = "";
+      }
+      if (usernameInputRef.current && state?.email) {
+        usernameInputRef.current.value = state.email;
+      }
+    }
+  }, [state]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Card className="overflow-hidden p-0">
+        <CardContent className="grid p-0 md:grid-cols-2 md:items-stretch">
+          <form action={formAction} className="p-4 md:p-6">
+            <FieldGroup className="gap-4">
+              <div className="flex flex-col items-center gap-1.5 text-center mb-1">
+                <h1 className="text-2xl font-bold">Create an account</h1>
+                <p className="text-muted-foreground text-balance text-sm">
+                  Sign up for your Acme Inc account
+                </p>
+              </div>
+              <Field>
+                <FieldLabel htmlFor="name">Name</FieldLabel>
+                <Input
+                  ref={nameInputRef}
+                  name="name"
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  autoComplete="name"
+                  defaultValue={state?.name || ""}
+                  required
+                />
+                {state?.fieldErrors?.name && (
+                  <FieldDescription className="text-red-600 text-sm mt-1">
+                    {state.fieldErrors.name[0]}
+                  </FieldDescription>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  ref={emailInputRef}
+                  name="email"
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  autoComplete="email"
+                  defaultValue={state?.email || ""}
+                  required
+                />
+                {state?.fieldErrors?.email && (
+                  <FieldDescription className="text-red-600 text-sm mt-1">
+                    {state.fieldErrors.email[0]}
+                  </FieldDescription>
+                )}
+              </Field>
+              {/* Hidden username field for password manager accessibility */}
+              <input
+                ref={usernameInputRef}
+                type="text"
+                name="username"
+                autoComplete="username"
+                defaultValue={state?.email || ""}
+                tabIndex={-1}
+                aria-hidden="true"
+                className="sr-only"
+                readOnly
+              />
+              <Field>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  ref={passwordInputRef}
+                  name="password"
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  key={
+                    state?.error || state?.fieldErrors
+                      ? "password-error"
+                      : "password"
+                  }
+                  required
+                />
+                {state?.fieldErrors?.password && (
+                  <FieldDescription className="text-red-600 text-sm mt-1">
+                    {state.fieldErrors.password[0]}
+                  </FieldDescription>
+                )}
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="confirmPassword">
+                  Confirm Password
+                </FieldLabel>
+                <Input
+                  ref={confirmPasswordInputRef}
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  key={
+                    state?.error || state?.fieldErrors
+                      ? "confirm-password-error"
+                      : "confirm-password"
+                  }
+                  required
+                />
+                {state?.fieldErrors?.confirmPassword && (
+                  <FieldDescription className="text-red-600 text-sm mt-1">
+                    {state.fieldErrors.confirmPassword[0]}
+                  </FieldDescription>
+                )}
+              </Field>
+              {state?.error && (
+                <Field>
+                  <FieldDescription className="text-red-600 text-sm">
+                    {state.error}
+                  </FieldDescription>
+                </Field>
+              )}
+              <Field>
+                <Button type="submit" isLoading={isPending}>
+                  Sign up
+                </Button>
+              </Field>
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card my-2">
+                Or continue with
+              </FieldSeparator>
+              <Field className="grid grid-cols-1 gap-4">
+                <Button variant="outline" type="button" isLoading={isPending}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span className="sr-only">Sign up with Google</span>
+                </Button>
+              </Field>
+              <FieldDescription className="text-center">
+                Already have an account?{" "}
+                <Button variant="link" size="sm" onClick={onSignIn}>
+                  Sign in
+                </Button>
+              </FieldDescription>
+            </FieldGroup>
+          </form>
+          <div className="relative hidden md:block h-full bg-white">
+            <ShipIllustration className="absolute inset-0 h-full w-full dark:brightness-[0.2] dark:grayscale" />
+          </div>
+        </CardContent>
+      </Card>
+      <FieldDescription className="px-4 text-center text-xs">
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        and <a href="#">Privacy Policy</a>.
+      </FieldDescription>
+    </div>
+  );
+}
