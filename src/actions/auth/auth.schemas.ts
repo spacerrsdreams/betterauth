@@ -28,8 +28,3 @@ export type LoginFormState = {
     confirmPassword?: string[];
   };
 } | null;
-
-export const signInWithEmailAndPasswordSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1),
-});

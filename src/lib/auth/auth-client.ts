@@ -9,3 +9,13 @@ export const signInWithGoogle = async () => {
     provider: "google",
   });
 };
+
+export const signInWithEmailAndPassword = async (
+  email: string,
+  password: string
+) => {
+  return await authClient.signIn.email({
+    email,
+    password,
+  });
+};

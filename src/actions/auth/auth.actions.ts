@@ -5,7 +5,6 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   LoginFormState,
-  signInWithEmailAndPasswordSchema,
   signUpWithEmailAndPasswordSchema,
 } from "@/actions/auth/auth.schemas";
 import z from "zod";
@@ -41,41 +40,6 @@ export async function signUpWithEmailAndPassword(
       password,
     },
   });
-
-  redirect("/");
-}
-
-export async function signInWithEmailAndPassword(
-  prevState: LoginFormState,
-  formData: FormData
-): Promise<LoginFormState> {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  const result = signInWithEmailAndPasswordSchema.safeParse({
-    email,
-    password,
-  });
-
-  if (!result.success) {
-    return {
-      fieldErrors: z.flattenError(result.error).fieldErrors,
-    };
-  }
-
-  const response = await auth.api.signInEmail({
-    body: {
-      email,
-      password,
-    },
-  });
-
-  if (!response.user) {
-    return {
-      error: "Invalid email or password",
-      email,
-    };
-  }
 
   redirect("/");
 }

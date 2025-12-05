@@ -5,41 +5,64 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ShipIllustration } from "@/components/illustrations/ship.illustration";
-import { useActionState, useRef, useEffect, useState } from "react";
-import { signInWithEmailAndPassword } from "@/actions/auth/auth.actions";
-import { signInWithGoogle } from "@/lib/auth/auth-client";
+import { useState, useRef, useEffect } from "react";
+import {
+  signInWithEmailAndPassword,
+  signInWithGoogle,
+} from "@/lib/auth/auth-client";
+
+import { useForm } from "@tanstack/react-form";
+import { signInWithEmailAndPasswordSchema } from "@/lib/auth/auth.schema";
 
 interface SignInFormProps {
   onSignUp: () => void;
 }
 
 export function SignInForm({ onSignUp }: SignInFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [state, formAction, isPending] = useActionState(
-    signInWithEmailAndPassword,
-    null
-  );
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const passwordInputRef = useRef<HTMLInputElement>(null);
   const usernameInputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+
+    validators: {
+      onSubmit: signInWithEmailAndPasswordSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setIsLoading(true);
+      signInWithEmailAndPassword(value.email, value.password)
+        .then((data) => {
+          if (data.error) {
+            setError(data.error?.code ?? "Unknown error");
+          }
+        })
+        .catch((data) => {
+          setError(data.error?.code ?? "Unknown error");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+  });
+
+  // Sync username field with email for password manager accessibility
   useEffect(() => {
-    if (state?.error && emailInputRef.current) {
-      emailInputRef.current.value = state.email || "";
+    if (usernameInputRef.current) {
+      usernameInputRef.current.value = form.state.values.email;
     }
-    if (state?.error && passwordInputRef.current) {
-      passwordInputRef.current.value = "";
-    }
-    if (state?.error && usernameInputRef.current) {
-      usernameInputRef.current.value = state.email || "";
-    }
-  }, [state]);
+  }, [form.state.values.email]);
 
   const handleSignInWithGoogle = async () => {
     setGoogleLoading(true);
@@ -52,74 +75,120 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
     }
   };
 
+  const generateErrorMessage = (error: string) => {
+    switch (error) {
+      case "INVALID_EMAIL_OR_PASSWORD":
+        return "Invalid email or password";
+      default:
+        return "An error occurred, please try again";
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2 md:items-stretch">
-          <form action={formAction} className="p-6 md:p-8">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+            className="p-6 md:p-8"
+          >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground text-balance">
                   Login to your Acme Inc account
                 </p>
+                {error && (
+                  <p className="text-red-500">{generateErrorMessage(error)}</p>
+                )}
               </div>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  ref={emailInputRef}
-                  name="email"
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  autoComplete="email"
-                  defaultValue={state?.email || ""}
-                  required
-                />
-              </Field>
+              <form.Field name="email">
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => {
+                          field.handleChange(e.target.value);
+                          if (error) setError(null);
+                        }}
+                        aria-invalid={isInvalid}
+                        placeholder="m@example.com"
+                        autoComplete="email"
+                        required
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              </form.Field>
               {/* Hidden username field for password manager accessibility */}
               <input
                 ref={usernameInputRef}
                 type="text"
                 name="username"
                 autoComplete="username"
-                defaultValue={state?.email || ""}
+                value={form.state.values.email}
                 tabIndex={-1}
                 aria-hidden="true"
                 className="sr-only"
                 readOnly
               />
+              <form.Field name="password">
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <div className="flex items-center">
+                        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                        <a
+                          href="#"
+                          className="ml-auto underline-offset-2 text-xs hover:underline"
+                        >
+                          Forgot your password?
+                        </a>
+                      </div>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="password"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        aria-invalid={isInvalid}
+                        autoComplete="current-password"
+                        required
+                        onChange={(e) => {
+                          field.handleChange(e.target.value);
+                          if (error) setError(null);
+                        }}
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              </form.Field>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  ref={passwordInputRef}
-                  name="password"
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  key={state?.error ? "password-error" : "password"}
-                  required
-                />
-              </Field>
-              {(state?.error || state?.fieldErrors) && (
-                <Field>
-                  <FieldDescription className="text-red-600 text-sm">
-                    {state?.error ||
-                      (state?.fieldErrors?.email && "Email is required") ||
-                      (state?.fieldErrors?.password && "Password is required")}
-                  </FieldDescription>
-                </Field>
-              )}
-              <Field>
-                <Button type="submit" isLoading={isPending}>
+                <Button
+                  type="submit"
+                  isLoading={isLoading}
+                  disabled={isLoading || googleLoading}
+                >
                   Login
                 </Button>
               </Field>
@@ -131,7 +200,7 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
                   variant="outline"
                   type="button"
                   isLoading={googleLoading}
-                  disabled={isPending}
+                  disabled={isLoading || googleLoading}
                   onClick={handleSignInWithGoogle}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
