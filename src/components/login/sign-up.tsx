@@ -21,6 +21,7 @@ import {
 
 import { useForm } from "@tanstack/react-form";
 import { signUpWithEmailAndPasswordSchema } from "@/lib/auth/auth.schema";
+import { siteConfig } from "@/config/site.config";
 
 interface SignUpFormProps {
   onSignIn: () => void;
@@ -162,7 +163,7 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
               <div className="flex flex-col items-center gap-1.5 text-center mb-1">
                 <h1 className="text-2xl font-bold">Create an account</h1>
                 <p className="text-muted-foreground text-balance text-sm">
-                  Sign up for your Acme Inc account
+                  Sign up for your {siteConfig.name} account
                 </p>
                 {error && (
                   <p className="text-red-500 text-sm">

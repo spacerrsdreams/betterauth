@@ -20,6 +20,7 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { signInWithEmailAndPasswordSchema } from "@/lib/auth/auth.schema";
 import Link from "next/link";
+import { siteConfig } from "@/config/site.config";
 
 interface SignInFormProps {
   onSignUp: () => void;
@@ -103,7 +104,7 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your Acme Inc account
+                  Login to your {siteConfig.name} account
                 </p>
                 {error && error === "EMAIL_NOT_VERIFIED" && (
                   <div className="flex flex-col gap-2 p-4 rounded-lg bg-muted/50 border border-border w-full">
