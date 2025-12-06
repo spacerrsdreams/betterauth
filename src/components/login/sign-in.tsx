@@ -88,8 +88,8 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card className="overflow-hidden p-0">
+    <div className="flex flex-col gap-6 w-full">
+      <Card className="overflow-hidden p-0 w-full">
         <CardContent className="grid p-0 md:grid-cols-2 md:items-stretch">
           <form
             onSubmit={(e) => {
@@ -228,6 +228,7 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
           </div>
         </CardContent>
       </Card>
+
       <FieldDescription className="px-6 text-center">
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.

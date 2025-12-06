@@ -9,9 +9,14 @@ export function LoginForm() {
     "sign-in"
   );
 
-  if (currentStep === "sign-in") {
-    return <SignInForm onSignUp={() => setCurrentStep("sign-up")} />;
-  }
-
-  return <SignUpForm onSignIn={() => setCurrentStep("sign-in")} />;
+  return (
+    <div className="w-full max-w-sm md:max-w-4xl z-10">
+      {currentStep === "sign-in" && (
+        <SignInForm onSignUp={() => setCurrentStep("sign-up")} />
+      )}
+      {currentStep === "sign-up" && (
+        <SignUpForm onSignIn={() => setCurrentStep("sign-in")} />
+      )}
+    </div>
+  );
 }

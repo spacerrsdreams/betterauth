@@ -19,7 +19,8 @@ export const auth = betterAuth({
       void sendEmail({
         to: user.email,
         subject: "Verify your email address",
-        text: `Click the link to verify your email: ${url}`,
+        url,
+        firstName: user.name,
       });
     },
   },

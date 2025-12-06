@@ -27,3 +27,13 @@ export const signUpWithEmailAndPassword = async (
     password,
   });
 };
+
+export const sendVerificationEmail = async (props: {
+  email: string;
+  callbackURL?: string;
+}) => {
+  return await authClient.sendVerificationEmail({
+    email: props.email,
+    callbackURL: props.callbackURL || "/",
+  });
+};

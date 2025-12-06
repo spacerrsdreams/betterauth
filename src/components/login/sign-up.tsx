@@ -13,14 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { ShipIllustration } from "@/components/illustrations/ship.illustration";
 import { useState, useRef, useEffect } from "react";
+import { VerificationSent } from "@/components/login/verification-sent";
 import {
   signUpWithEmailAndPassword,
   signInWithGoogle,
+  sendVerificationEmail,
 } from "@/lib/auth/auth-client";
 
 import { useForm } from "@tanstack/react-form";
 import { signUpWithEmailAndPasswordSchema } from "@/lib/auth/auth.schema";
-import { useRouter } from "next/navigation";
 
 interface SignUpFormProps {
   onSignIn: () => void;
@@ -31,7 +32,9 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -53,7 +56,8 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
             return;
           }
 
-          router.push("/");
+          setError(null);
+          setVerificationSent(true);
         })
         .catch((data) => {
           setError(data.error?.code ?? "Unknown error");
@@ -70,6 +74,41 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
       usernameInputRef.current.value = form.state.values.email;
     }
   }, [form.state.values.email]);
+
+  useEffect(() => {
+    if (verificationSent && resendTimer > 0) {
+      const timer = setTimeout(() => {
+        setResendTimer(resendTimer - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [verificationSent, resendTimer]);
+
+  // Start timer when verification is sent and clear any errors
+  useEffect(() => {
+    if (verificationSent) {
+      setResendTimer(30);
+      setError(null);
+    }
+  }, [verificationSent]);
+
+  const handleResendVerification = async () => {
+    if (resendTimer > 0 || resendLoading) return;
+
+    setResendLoading(true);
+    try {
+      await sendVerificationEmail({
+        email: form.state.values.email,
+        callbackURL: "/",
+      });
+      setResendTimer(30);
+      setError(null);
+    } catch {
+      setError("Failed to resend verification email. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleSignUpWithGoogle = async () => {
     setGoogleLoading(true);
@@ -97,9 +136,22 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
     }
   };
 
+  if (verificationSent) {
+    return (
+      <VerificationSent
+        email={form.state.values.email}
+        error={error}
+        resendTimer={resendTimer}
+        resendLoading={resendLoading}
+        onResend={handleResendVerification}
+        onBackToSignIn={onSignIn}
+      />
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-4">
-      <Card className="overflow-hidden p-0">
+    <div className="flex flex-col gap-4 w-full">
+      <Card className="overflow-hidden p-0 w-full">
         <CardContent className="grid p-0 md:grid-cols-2 md:items-stretch">
           <form
             onSubmit={(e) => {
