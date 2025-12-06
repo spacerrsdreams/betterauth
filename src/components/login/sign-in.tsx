@@ -82,6 +82,8 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
     switch (error) {
       case "INVALID_EMAIL_OR_PASSWORD":
         return "Invalid email or password";
+      case "EMAIL_NOT_VERIFIED":
+        return "Email not verified";
       default:
         return "An error occurred, please try again";
     }
@@ -103,7 +105,18 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
                 <p className="text-muted-foreground text-balance">
                   Login to your Acme Inc account
                 </p>
-                {error && (
+                {error && error === "EMAIL_NOT_VERIFIED" && (
+                  <div className="flex flex-col gap-2 p-4 rounded-lg bg-muted/50 border border-border w-full">
+                    <p className="text-sm font-medium text-foreground">
+                      Email not verified
+                    </p>
+                    <p className="text-xs text-muted-foreground text-balance">
+                      Please check your email and click the verification link to
+                      verify your account, or sign in with Google.
+                    </p>
+                  </div>
+                )}
+                {error && error !== "EMAIL_NOT_VERIFIED" && (
                   <p className="text-red-500">{generateErrorMessage(error)}</p>
                 )}
               </div>
