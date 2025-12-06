@@ -45,7 +45,7 @@ export function VerificationSent({
                 </div>
                 <h1 className="text-xl font-bold">Check your email</h1>
                 <p className="text-muted-foreground text-sm text-balance">
-                  We&apos;ve sent a verification link to{" "}
+                  Weve sent a verification link to{" "}
                   <span className="font-semibold text-foreground">{email}</span>
                 </p>
                 <p className="text-muted-foreground text-xs text-balance">

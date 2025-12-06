@@ -11,7 +11,6 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ShipIllustration } from "@/components/illustrations/ship.illustration";
 import { useState, useRef, useEffect } from "react";
 import { VerificationSent } from "@/components/login/verification-sent";
 import {
@@ -152,13 +151,12 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
   return (
     <div className="flex flex-col gap-4 w-full">
       <Card className="overflow-hidden p-0 w-full">
-        <CardContent className="grid p-0 md:grid-cols-2 md:items-stretch">
+        <CardContent className="p-6 md:p-8">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit();
             }}
-            className="p-4 md:p-6"
           >
             <FieldGroup className="gap-4">
               <div className="flex flex-col items-center gap-1.5 text-center mb-1">
@@ -339,9 +337,6 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
               </FieldDescription>
             </FieldGroup>
           </form>
-          <div className="relative hidden md:block h-full bg-white">
-            <ShipIllustration className="absolute inset-0 h-full w-full dark:brightness-[0.2] dark:grayscale" />
-          </div>
         </CardContent>
       </Card>
       <FieldDescription className="px-4 text-center text-xs">

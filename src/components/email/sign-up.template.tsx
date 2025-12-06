@@ -18,7 +18,7 @@ interface EmailVerificationEmailTemplateProps {
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_DOMAIN
-  ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
+  ? `${process.env.NEXT_PUBLIC_DOMAIN}`
   : "";
 
 export const EmailVerificationEmailTemplate = ({

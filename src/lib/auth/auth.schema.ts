@@ -27,3 +27,19 @@ export interface SignInWithEmailAndPasswordProps {
   password: string;
   callbackURL?: string;
 }
+
+export const requestPasswordResetSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(MIN_PASSWORD_LENGTH, MinPasswordLengthError),
+    confirmPassword: z
+      .string()
+      .min(MIN_PASSWORD_LENGTH, MinPasswordLengthError),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });

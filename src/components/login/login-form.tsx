@@ -10,7 +10,7 @@ export function LoginForm() {
   );
 
   return (
-    <div className="w-full max-w-sm md:max-w-4xl z-10">
+    <div className="w-full max-w-sm z-10">
       {currentStep === "sign-in" && (
         <SignInForm onSignUp={() => setCurrentStep("sign-up")} />
       )}

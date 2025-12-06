@@ -37,3 +37,23 @@ export const sendVerificationEmail = async (props: {
     callbackURL: props.callbackURL || "/",
   });
 };
+
+export const requestPasswordReset = async (props: {
+  email: string;
+  redirectTo?: string;
+}) => {
+  return await authClient.requestPasswordReset({
+    email: props.email,
+    redirectTo: props.redirectTo,
+  });
+};
+
+export const resetPassword = async (props: {
+  newPassword: string;
+  token: string;
+}) => {
+  return await authClient.resetPassword({
+    newPassword: props.newPassword,
+    token: props.token,
+  });
+};

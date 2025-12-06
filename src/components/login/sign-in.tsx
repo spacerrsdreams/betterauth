@@ -11,7 +11,6 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ShipIllustration } from "@/components/illustrations/ship.illustration";
 import { useState, useRef, useEffect } from "react";
 import {
   signInWithEmailAndPassword,
@@ -20,6 +19,7 @@ import {
 
 import { useForm } from "@tanstack/react-form";
 import { signInWithEmailAndPasswordSchema } from "@/lib/auth/auth.schema";
+import Link from "next/link";
 
 interface SignInFormProps {
   onSignUp: () => void;
@@ -90,13 +90,12 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
   return (
     <div className="flex flex-col gap-6 w-full">
       <Card className="overflow-hidden p-0 w-full">
-        <CardContent className="grid p-0 md:grid-cols-2 md:items-stretch">
+        <CardContent className="p-6 md:p-8">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit();
             }}
-            className="p-6 md:p-8"
           >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
@@ -158,12 +157,12 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
                     <Field data-invalid={isInvalid}>
                       <div className="flex items-center">
                         <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                        <a
-                          href="#"
+                        <Link
+                          href="/reset-password"
                           className="ml-auto underline-offset-2 text-xs hover:underline"
                         >
                           Forgot your password?
-                        </a>
+                        </Link>
                       </div>
                       <Input
                         id={field.name}
@@ -223,9 +222,6 @@ export function SignInForm({ onSignUp }: SignInFormProps) {
               </FieldDescription>
             </FieldGroup>
           </form>
-          <div className="relative hidden md:block h-full bg-white">
-            <ShipIllustration className="absolute inset-0 h-full w-full dark:brightness-[0.2] dark:grayscale" />
-          </div>
         </CardContent>
       </Card>
 
